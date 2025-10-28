@@ -1,0 +1,17 @@
+# ETL Libraries
+pdf-chunk-flow==0.1.1
+embedding-flow==0.1.9
+# Airflow dependencies
+apache-airflow==3.0.4rc2
+pendulum>=2.1.0
+redis>=7.0.0
+# Kafka dependencies
+confluent-kafka>=2.3.0
+six>=1.15.0
+# Python dependencies (sin torch, se instala aparte)
+sentence-transformers>=2.2.0
+transformers>=4.30.0
+pandas
+pyarrow
+qdrant-client>=1.7.0
+python-dotenv

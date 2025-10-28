@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  qdrant:
+    environment:
+      # Configuración con API key simple para desarrollo
+      QDRANT__SERVICE__API_KEY: "dev_key_123"
+      QDRANT__LOG_LEVEL: DEBUG
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+      QDRANT__SERVICE__HOST: "0.0.0.0"
+    
+    ports:
+      # Expone el puerto HTTP y gRPC al host local
+      - "6333:6333"
+      - "6334:6334"
+
+    volumes:
+      # Persistencia local de los datos
+      - ./qdrant_data:/qdrant/storage
+
+    # Si querés que solo se levante cuando lo necesites
+    restart: unless-stopped

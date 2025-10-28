@@ -1,0 +1,80 @@
+services:
+  airflow:
+    build:
+      context: ../docker/airflow
+      dockerfile: Dockerfile
+    container_name: airflow_service
+    ports:
+      - "8080:8080"
+    environment:
+      - AIRFLOW_UID=$(id -u)
+      - AIRFLOW_GID=0
+      - QDRANT_URL=http://qdrant_service:6333
+      - QDRANT_API_KEY=dev_key_123
+      - QDRANT_COLLECTION=embeddings_collection
+      - VECTOR_SIZE=768
+      - KAFKA_BOOTSTRAP_SERVERS=kafka_service:9092
+    volumes:
+      - ../services/airflow_dags:/opt/airflow/dags
+    networks:
+      - embedding_network
+    depends_on:
+      - kafka
+      - qdrant
+
+  kafka:
+    extends:
+      file: ../docker/kafka_service/docker-compose.override.yml
+      service: kafka
+    container_name: kafka_service
+    networks:
+      - embedding_network
+    volumes:
+      - ../docker/kafka_service/kafka_data:/tmp/kraft-combined-logs
+
+  qdrant:
+    extends:
+      file: ../docker/qdrant/docker-compose.override.yml
+      service: qdrant
+    build:
+      context: ../docker/qdrant
+      dockerfile: Dockerfile
+    container_name: qdrant_service
+    env_file:
+      - ../environment_variables/.env.qdrant
+    networks:
+      - embedding_network
+
+  redis:
+    extends:
+      file: ../docker/redis/docker-compose.override.yml
+      service: redis
+  
+  controller_service:
+    build:
+      context: ../services/controller_service
+      dockerfile: Dockerfile
+    container_name: controller_service
+    volumes:
+      - ../services/controller_service:/opt/controller_service
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../..:/home/facuvega/Documentos/agent-full:rw
+    user: "0:0"
+    ports:
+      - "8000:8000"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka_service:9092
+      - KAFKA_TOPIC=etl-events
+      - GATEWAY_URL=http://gateway_service:8000/start
+    depends_on:
+      - kafka
+    networks:
+      - embedding_network
+
+networks:
+  embedding_network:
+    driver: bridge
+
+volumes:
+  kafka_data:
+  redis_data:
