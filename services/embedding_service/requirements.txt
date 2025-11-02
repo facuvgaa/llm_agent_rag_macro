@@ -1,0 +1,4 @@
+fastapi
+pydantic
+sentence_transformers
+uvicorn

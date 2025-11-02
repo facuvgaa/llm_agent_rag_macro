@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+langchain==1.0.2
+langchain-community
+langchain-ollama>=1.0.0
+httpx
+qdrant-client
+langchain_qdrant
+redis

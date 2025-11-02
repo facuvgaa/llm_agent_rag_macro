@@ -1,7 +1,15 @@
 FROM python:3.11-slim
 
+WORKDIR /opt/embedding_service
 
-RUN pip install torch transformers sentence-transformers fastapi uvicorn
 
+COPY services/embedding_service/requirements.txt ./requirements.txt
 
-CMD ["uvicorn", "main:app"]
+RUN pip install --no-cache-dir torch==2.3.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY services/embedding_service/app ./app
+
+EXPOSE 8001
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]

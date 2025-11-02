@@ -1,2 +1,33 @@
 .env
 venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Datos de runtime
+docker/kafka_service/kafka_data/
+docker/qdrant/qdrant_data/
+docker/redis/redis_data/
+docker/redis_service_rag/redis_data/
+services/qdrant_data/
+
+# Node modules (ya está en frontend/.gitignore pero por si acaso)
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Archivos temporales
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# Variables de entorno
+environment_variables/.env*
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db

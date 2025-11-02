@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes.routes import router as rag_router
+from routes.routes import queryrag as rag_router
 
 app = FastAPI(
     title="Macro-Flow API Gateway",

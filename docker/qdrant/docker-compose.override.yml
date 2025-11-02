@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   qdrant:
     environment:
@@ -14,10 +12,5 @@ services:
       # Expone el puerto HTTP y gRPC al host local
       - "6333:6333"
       - "6334:6334"
-
-    volumes:
-      # Persistencia local de los datos
-      - ./qdrant_data:/qdrant/storage
-
     # Si querés que solo se levante cuando lo necesites
     restart: unless-stopped

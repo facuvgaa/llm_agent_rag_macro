@@ -42,6 +42,8 @@ services:
     container_name: qdrant_service
     env_file:
       - ../environment_variables/.env.qdrant
+    volumes:
+      - qdrant_data:/qdrant/storage
     networks:
       - embedding_network
 
@@ -49,32 +51,11 @@ services:
     extends:
       file: ../docker/redis/docker-compose.override.yml
       service: redis
-  
-  controller_service:
-    build:
-      context: ../services/controller_service
-      dockerfile: Dockerfile
-    container_name: controller_service
-    volumes:
-      - ../services/controller_service:/opt/controller_service
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ../..:/home/facuvega/Documentos/agent-full:rw
-    user: "0:0"
-    ports:
-      - "8000:8000"
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka_service:9092
-      - KAFKA_TOPIC=etl-events
-      - GATEWAY_URL=http://gateway_service:8000/start
-    depends_on:
-      - kafka
-    networks:
-      - embedding_network
 
 networks:
   embedding_network:
     driver: bridge
 
 volumes:
-  kafka_data:
+  qdrant_data:
   redis_data:

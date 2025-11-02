@@ -1,24 +1,24 @@
 services: 
   qdrant:
-    extends:
-      file: ../docker/qdrant/docker-compose.override.yml
-      service: qdrant
-    build:
-      context: ../docker/qdrant
-      dockerfile: Dockerfile
+    image: qdrant/qdrant:latest
     container_name: qdrant_service
-    env_file:
-      - ../environment_variables/.env.qdrant
+    volumes:
+      - infra_qdrant_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__API_KEY: "dev_key_123"
+      QDRANT__LOG_LEVEL: DEBUG
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+      QDRANT__SERVICE__HOST: "0.0.0.0"
     ports:
       - "6333:6333"
       - "6334:6334"
     networks:
       - rag_network
-
   gateway_service:
     build:
-      context: ../docker/api_gateway
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/api_gateway/Dockerfile
     container_name: gateway_service
     volumes:
       - ../services/api_gateway:/opt/api_gateway
@@ -31,30 +31,39 @@ services:
   
   langchains_service:
     build:
-      context: ../docker/langchains_service
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/langchains_service/Dockerfile
     container_name: langchains_service
+    env_file:
+      - ../environment_variables/.env.rag
+    ports:
+      - "8002:8000"
     volumes:
       - ../services/langchains_service:/opt/langchains_service
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - rag_network
+    depends_on:
+      - qdrant
+      - redis
   
   redis:
-    build:
-      context: ../docker/redis_service_rag
-      dockerfile: Dockerfile
+    image: redis:7-alpine
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - ../docker/redis_service_rag/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ../docker/redis_service_rag/redis_data:/data
     container_name: redis_service
     networks:
       - rag_network
   
   embedding_service:
     build:
-      context: ../docker/embedding_service
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/embedding_service/Dockerfile
     container_name: embedding_service
     ports:
-      - "8001:8000"
+      - "8001:8001"
     networks:
       - rag_network
       
@@ -64,10 +73,35 @@ services:
       dockerfile: Dockerfile
     container_name: llm_service
     ports:
-      - "8002:8000"
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rag_network
+
+  llm_model_init:
+    image: ollama/ollama
+    depends_on:
+      llm_service:
+        condition: service_healthy
+    volumes:
+      - ollama_models:/root/.ollama
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull llama3.2:1b && echo 'Model ready'"]
+    restart: "no"
     networks:
       - rag_network
 
 networks:
   rag_network:
     driver: bridge
+
+volumes:
+  infra_qdrant_data:
+    external: true
+  ollama_models:
