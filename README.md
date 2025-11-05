@@ -10,7 +10,7 @@ Sistema de Retrieval Augmented Generation (RAG) para el Banco Macro que permite 
 
 ## 📋 Arquitectura del Sistema
 
-![Diagrama de Arquitectura](docs/images/arquitectura-rag.excalidraw)
+![Diagrama de Arquitectura](docs/images/arquitectura-rag.png)
 
 El sistema está compuesto por dos partes principales:
 
@@ -228,7 +228,7 @@ RAG (Retrieval Augmented Generation) system for Macro Bank that allows querying 
 
 ## 📋 System Architecture
 
-![Architecture Diagram](docs/images/arquitectura-rag.excalidraw)
+![Architecture Diagram](docs/images/arquitectura-rag.png)
 
 The system consists of two main parts:
 

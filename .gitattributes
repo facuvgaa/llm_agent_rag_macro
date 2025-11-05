@@ -1,0 +1,17 @@
+# Linguist attributes para mejor detección de lenguajes
+frontend/** linguist-documentation=false
+frontend/node_modules/** linguist-vendored=true
+*.py linguist-language=Python
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+*.js linguist-language=JavaScript
+*.jsx linguist-language=JavaScript
+*.yml linguist-language=YAML
+*.yaml linguist-language=YAML
+*.dockerfile linguist-language=Dockerfile
+Dockerfile linguist-language=Dockerfile
+*.md linguist-documentation=true
+*.excalidraw linguist-documentation=true
+*.gif linguist-documentation=true
+*.webm linguist-documentation=true
+
