@@ -76,6 +76,10 @@ services:
       - "11434:11434"
     volumes:
       - ollama_models:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 8G  # Aumentar límite de memoria para el modelo 3b
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 10s
@@ -92,14 +96,38 @@ services:
     volumes:
       - ollama_models:/root/.ollama
     entrypoint: ["/bin/sh", "-c"]
-    command: ["ollama pull llama3.2:1b && echo 'Model ready'"]
+    command: ["ollama pull llama3.2:3b && echo 'Model ready'"]
     restart: "no"
     networks:
       - rag_network
 
+  frontend:
+    build:
+      context: ../
+      dockerfile: docker/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-http://172.19.0.4:8000}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0}
+        NEXT_PUBLIC_RAG_API_URL: http://gateway_service:8000/rag
+    container_name: frontend_service
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://172.19.0.4:8000}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0}
+      - NEXT_PUBLIC_RAG_API_URL=http://gateway_service:8000/rag
+      - NODE_ENV=production
+    depends_on:
+      - gateway_service
+    networks:
+      - rag_network
+      - supabase_network_chatbotui
+
 networks:
   rag_network:
     driver: bridge
+  supabase_network_chatbotui:
+    external: true
 
 volumes:
   infra_qdrant_data:
